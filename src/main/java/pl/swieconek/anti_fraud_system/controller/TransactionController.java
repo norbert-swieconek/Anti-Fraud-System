@@ -6,21 +6,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.swieconek.anti_fraud_system.dto.RequestTx;
-import pl.swieconek.anti_fraud_system.service.TransactionService;
+import pl.swieconek.anti_fraud_system.service.TransactionServiceImpl;
 import pl.swieconek.anti_fraud_system.dto.ResponseTx;
 
 @RestController
 @RequestMapping("/api/antifraud")
 public class TransactionController {
-    private final TransactionService transactionService;
+    private final TransactionServiceImpl transactionService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionServiceImpl transactionService) {
         this.transactionService = transactionService;
     }
 
     @PostMapping("/transaction")
     public ResponseEntity<ResponseTx> sendTx(@RequestBody RequestTx requestTx) {
-        return ResponseEntity.ok(transactionService.procesTx(requestTx));
+        return ResponseEntity.ok(transactionService.processTx(requestTx));
     }
 
 
