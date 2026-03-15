@@ -4,9 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.swieconek.anti_fraud_system.dto.DeleteUserRespond;
-import pl.swieconek.anti_fraud_system.dto.UserRequest;
-import pl.swieconek.anti_fraud_system.dto.UserResponse;
+import pl.swieconek.anti_fraud_system.dto.*;
 import pl.swieconek.anti_fraud_system.service.UserService;
 import java.util.List;
 
@@ -33,5 +31,15 @@ public class UserController {
     @DeleteMapping("/user/{username}")
     public ResponseEntity<DeleteUserRespond> deleteUser(@PathVariable String username) {
         return ResponseEntity.ok(userService.deleteUser(username));
+    }
+
+    @PutMapping("/role")
+    public ResponseEntity<UserResponse> changeRole(@RequestBody @Valid RoleRequest roleRequest) {
+        return ResponseEntity.ok(userService.changeRole(roleRequest.username(), roleRequest.role()));
+    }
+
+    @PutMapping("/access")
+    public ResponseEntity<AccessResponse> changeLock(@RequestBody @Valid AccessRequest accessRequest) {
+        return ResponseEntity.ok(userService.changeLock(accessRequest.username(), accessRequest.operation()));
     }
 }

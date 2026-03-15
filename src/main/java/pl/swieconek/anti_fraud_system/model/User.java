@@ -12,13 +12,20 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    private boolean isLocked;
+
+
 
     public User() {}
 
-    public User(String name, String username, String password) {
+    public User(String name, String username, String password, Role role, boolean isLocked) {
         this.name = name;
         this.username = username;
         this.password = password;
+        this.role = role;
+        this.isLocked = isLocked;
     }
 
     public Long getId() {
@@ -47,5 +54,21 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
     }
 }
