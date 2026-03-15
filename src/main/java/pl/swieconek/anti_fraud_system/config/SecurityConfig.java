@@ -7,7 +7,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/auth/user/**").hasRole(Role.ADMINISTRATOR.toString())
                         .requestMatchers(HttpMethod.PUT, "/api/auth/role").hasRole(Role.ADMINISTRATOR.toString())
                         .requestMatchers(HttpMethod.PUT, "/api/auth/access").hasRole(Role.ADMINISTRATOR.toString())
+                        .requestMatchers("/api/antifraud/suspicious-ip/**").hasRole(Role.SUPPORT.toString())
+                        .requestMatchers("/api/antifraud/stolencard/**").hasRole(Role.SUPPORT.toString())
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

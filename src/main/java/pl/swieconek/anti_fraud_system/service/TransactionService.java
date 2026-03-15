@@ -1,8 +1,8 @@
 package pl.swieconek.anti_fraud_system.service;
 
-import pl.swieconek.anti_fraud_system.dto.RequestTx;
-import pl.swieconek.anti_fraud_system.dto.ResponseTx;
+import pl.swieconek.anti_fraud_system.dto.TransactionRequest;
+import pl.swieconek.anti_fraud_system.dto.TransactionResponse;
 
 public interface TransactionService {
-    ResponseTx processTx(RequestTx requestTx);
+    TransactionResponse processTx(TransactionRequest transactionRequest);
 }

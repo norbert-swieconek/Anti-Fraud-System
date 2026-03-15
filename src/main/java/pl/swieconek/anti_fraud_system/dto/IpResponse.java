@@ -1,4 +1,4 @@
 package pl.swieconek.anti_fraud_system.dto;
 
-public record RequestTx(Long amount) {
+public record IpResponse(Long id, String ip) {
 }
