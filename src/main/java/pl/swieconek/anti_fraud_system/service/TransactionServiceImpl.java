@@ -3,15 +3,15 @@ package pl.swieconek.anti_fraud_system.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import pl.swieconek.anti_fraud_system.model.Status;
+import pl.swieconek.anti_fraud_system.model.*;
 import pl.swieconek.anti_fraud_system.dto.TransactionRequest;
 import pl.swieconek.anti_fraud_system.dto.TransactionResponse;
-import pl.swieconek.anti_fraud_system.model.StolenCard;
-import pl.swieconek.anti_fraud_system.model.SuspiciousIp;
 import pl.swieconek.anti_fraud_system.repository.StolenCardRepository;
 import pl.swieconek.anti_fraud_system.repository.SuspiciousIpRepository;
+import pl.swieconek.anti_fraud_system.repository.TransactionRepository;
 import pl.swieconek.anti_fraud_system.validator.DataValidator;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -19,15 +19,21 @@ public class TransactionServiceImpl implements TransactionService {
     private final DataValidator dataValidator;
     private final SuspiciousIpRepository suspiciousIpRepository;
     private final StolenCardRepository stolenCardRepository;
+    private final TransactionRepository transactionRepository;
 
-    public TransactionServiceImpl(DataValidator dataValidator, SuspiciousIpRepository suspiciousIpRepository, StolenCardRepository stolenCardRepository) {
+    public TransactionServiceImpl(DataValidator dataValidator, SuspiciousIpRepository suspiciousIpRepository, StolenCardRepository stolenCardRepository, TransactionRepository transactionRepository) {
         this.dataValidator = dataValidator;
         this.suspiciousIpRepository = suspiciousIpRepository;
         this.stolenCardRepository = stolenCardRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public TransactionResponse processTx(TransactionRequest transactionRequest) {
         if (!dataValidator.validateCard(transactionRequest.number()) || !dataValidator.validateIp(transactionRequest.ip())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        if (!dataValidator.checkRegion(transactionRequest.region())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
@@ -53,6 +59,38 @@ public class TransactionServiceImpl implements TransactionService {
         if (transactionRequest.amount() > 200 && transactionRequest.amount() <= 1500) {
             manualReasons.add("amount");
         }
+
+        LocalDateTime endDate = transactionRequest.date();
+        LocalDateTime startDate = endDate.minusHours(1);
+        List<Transaction> history = transactionRepository.findByNumberAndDateGreaterThanAndDateLessThan(transactionRequest.number(), startDate, endDate);
+
+        long uniqueIps = history.stream()
+                .map(Transaction::getIp)
+                .filter(ip -> !Objects.equals(ip, transactionRequest.ip()))
+                .distinct()
+                .count();
+
+        long uniqueRegions = history.stream()
+                .map(Transaction::getRegion)
+                .filter(region -> !Objects.equals(region.toString(), transactionRequest.region()))
+                .distinct()
+                .count();
+
+        if (uniqueIps > 2) {
+            prohibitedReasons.add("ip-correlation");
+        }
+        if (uniqueRegions > 2) {
+            prohibitedReasons.add("region-correlation");
+        }
+        if (uniqueIps == 2) {
+            manualReasons.add("ip-correlation");
+        }
+        if (uniqueRegions == 2) {
+            manualReasons.add("region-correlation");
+        }
+
+        Transaction transaction = new Transaction(transactionRequest.amount(), transactionRequest.ip(), transactionRequest.number(), Region.valueOf(transactionRequest.region()), transactionRequest.date());
+        transactionRepository.save(transaction);
 
         if (!prohibitedReasons.isEmpty()){
             Collections.sort(prohibitedReasons);
