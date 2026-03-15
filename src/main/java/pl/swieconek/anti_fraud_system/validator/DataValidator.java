@@ -1,6 +1,7 @@
 package pl.swieconek.anti_fraud_system.validator;
 
 import org.springframework.stereotype.Component;
+import pl.swieconek.anti_fraud_system.model.Region;
 
 @Component
 public class DataValidator {
@@ -50,5 +51,14 @@ public class DataValidator {
         sum += checkDigit;
 
         return sum % 10 == 0;
+    }
+
+    public boolean checkRegion(String region) {
+        try {
+            Region.valueOf(region);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 }
