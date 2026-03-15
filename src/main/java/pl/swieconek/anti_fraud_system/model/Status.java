@@ -1,4 +1,4 @@
-package pl.swieconek.anti_fraud_system.dto;
+package pl.swieconek.anti_fraud_system.model;
 
 public enum Status {
     ALLOWED,
